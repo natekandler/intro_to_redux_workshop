@@ -23,6 +23,28 @@ We'll need to start by adding a couple of libraries. From our root directory let
 * `yarn add redux-promise --save`
 The first item is self explanatory, this adds the Redux library to our project. The second, React-Redux provides bindings for React that we will be able to use in our components. The third Redux-Promise is middleware that we will use when making our database calls. We'll get into that a little more later.
 
-Now that we have our libraries in place, let's write our first reducer!
-### Release 1: Comments Reducer
+These libraries are now listed as dependencies in our package.json and yarn.lock files.
 
+Now that we have our libraries in place, let's write our first reducer!
+### Release 1: Creating Our Reducers
+On page load we're currently making a database call and updating our Comment Container's state with all of our comments. Let's update that so we're getting our comments from Redux. 
+
+The first thing we need to do is set up a reducer. A reducer sounds fancy, but it's just a function that returns a piece of the application's state.
+
+Let's start by creating a `/reducers` folder in our `/javascript` directory.
+
+We want to create a `commentReducer.js` file in the `/reducers` folder and in that file add a function that returns our comments.
+
+For now we'll start simple by taking this back to delivering us a static list. Once we have everything set up we'll add the database call but for now let's just everything wired up!
+
+### Release 2: Creating A Store And Binding It To Our Components
+Now we need to add those reducers to our application's state and bind them to React. We need to import two things in our CommentContainer. Let's import the createStore function from Redux and the Provider function from React-Redux.
+``` JavaScript
+import { createStore } from 'redux'
+import { Provider } from 'react-redux';
+```
+As the name implies, `createStore` will allow us to create a store which will be our application's state and `Provider` will give us a binding for that state in our React components.
+
+Let's add them in our comment container.
+
+### Release 3: Filling in the Comments Reducer

@@ -47,14 +47,59 @@ export default ( state = [], action) => {
 Cool, our reducer is there but it's not doing anything. Let's integrate it with React.
 
 ### Release 2: Creating A Store And Binding It To Our Components
-We need to add those reducers to our application's state and bind them to React. We need to import two things in our CommentContainer. Let's import the createStore function from Redux and the Provider function from React-Redux.
+We need to add those reducers to our application's state and bind them to React. Let's import the createStore function from Redux and the Provider component from React-Redux into our `index.js` file.
 ``` JavaScript
 import { createStore } from 'redux'
 import { Provider } from 'react-redux';
 ```
+And we'll need access to the reducer we just created so let's import that as well.
+``` JavaScript
+import commentReducer from '../reducers/commentReducer'
+```
 As the name implies, `createStore` will allow us to create a store which will be our application's state and `Provider` will give us a binding for that state in our React components.
 
-Let's add them in our comment container.
+Let's start by creating a store. Because we currently only have one reducer we'll just use that one. We will usually have more than one reducer and will combine them. We'll refactor later to see what that would look like, but again let's stick to the most simple implementation.
+``` JavaScript
+const store = createStore(commentReducer)
+```
+And we need to wrap our top level component in a `Provider` and pass in the store as a prop.
+``` JavaScript
+class CommentIndex extends Component {
+  render() {
+    return (
+      <Provider store={store}>
+        <CommentsContainer />  
+      </Provider>
+    )
+  }
+}
+```
+The top of our component tree now has access to the redux application state, so let's use it!
 
-### Release 3: Filling in the Comments Reducer
+In `CommentsContainer` we need to add a function called `mapStateToProps`, this is expected by `react-redux`. Because our only piece of state is the commentsReducer we'll set the value comments to that.
+
+``` JavaScript
+function mapStateToProps(state) {
+  return {
+    comments: state
+  }
+}
+```
+Now we need to import the `connect` function from `react-redux` in our `CommentsContainer`. 
+``` JavaScript
+import { connect } from 'react-redux';
+```
+And change the way we're exporting our component to use the `connect` function
+``` JavaScript
+export default connect(mapStateToProps)(CommentsContainer);
+```
+
+Voila! If we inspect the props on our `CommentsContainer` we can see the value passed in from our reducer as the `comments` prop.
+
+And if we just change the prop passed in to our `Comments` component to use the comments from props rather that the component state we're displaying comments using Redux!
+```
+<Comments comments={this.props.comments} deleteComment={deleteComment.bind(this)} />
+```
+
+### Release 3: Making the commentReducer dynamic
 

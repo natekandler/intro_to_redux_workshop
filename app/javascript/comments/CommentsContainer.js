@@ -3,6 +3,7 @@ import Comments from './Comments'
 import Form from './Form'
 import { getComments, createComment, deleteComment } from '../client/CommentClient'
 import { getFormValues, commentList } from '../Utils/utils'
+import { connect } from 'react-redux';
 
 class CommentsContainer extends Component {
   constructor(props) {
@@ -46,12 +47,18 @@ class CommentsContainer extends Component {
   render() {
     return (
       <div className="CommentsContainer">
-        <Comments comments={this.state.comments} deleteComment={deleteComment.bind(this)} />
+        <Comments comments={this.props.comments} deleteComment={deleteComment.bind(this)} />
         {this.renderForm()}
       </div>
     )
   }
 }
 
-export default CommentsContainer
+function mapStateToProps(state) {
+  return {
+    comments: state
+  }
+}
+
+export default connect(mapStateToProps, null)(CommentsContainer);
 

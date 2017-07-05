@@ -35,10 +35,19 @@ Let's start by creating a `/reducers` folder in our `/javascript` directory.
 
 We want to create a `commentReducer.js` file in the `/reducers` folder and in that file add a function that returns our comments.
 
-For now we'll start simple by taking this back to delivering us a static list. Once we have everything set up we'll add the database call but for now let's just everything wired up!
+The reducer function is going to take two arguments, state and an action. We'll get to the action in a bit. State will be the application's state we're concerned with in this reducer.
+
+ We'll give it a default value for the first time it's called and for now we'll just return a static comment to make sure everything is wired up correctly.
+
+``` JavaScript
+export default ( state = [], action) => {
+  return [{id: 1, author: "me!", body: "from the reducer"}]
+}
+```
+Cool, our reducer is there but it's not doing anything. Let's integrate it with React.
 
 ### Release 2: Creating A Store And Binding It To Our Components
-Now we need to add those reducers to our application's state and bind them to React. We need to import two things in our CommentContainer. Let's import the createStore function from Redux and the Provider function from React-Redux.
+We need to add those reducers to our application's state and bind them to React. We need to import two things in our CommentContainer. Let's import the createStore function from Redux and the Provider function from React-Redux.
 ``` JavaScript
 import { createStore } from 'redux'
 import { Provider } from 'react-redux';
@@ -48,3 +57,4 @@ As the name implies, `createStore` will allow us to create a store which will be
 Let's add them in our comment container.
 
 ### Release 3: Filling in the Comments Reducer
+

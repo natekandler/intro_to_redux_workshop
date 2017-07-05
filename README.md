@@ -97,9 +97,56 @@ export default connect(mapStateToProps)(CommentsContainer);
 Voila! If we inspect the props on our `CommentsContainer` we can see the value passed in from our reducer as the `comments` prop.
 
 And if we just change the prop passed in to our `Comments` component to use the comments from props rather that the component state we're displaying comments using Redux!
-```
+``` JavaScript
 <Comments comments={this.props.comments} deleteComment={deleteComment.bind(this)} />
 ```
+### Release 3: Creating Our First Action
+Right now we have a reducer that is returning a particular piece of state 
+and this is happening every time Redux looks through our reducers. But we need to tell Redux to update that state only when we want. We'll do this by creating an action.
 
-### Release 3: Making the commentReducer dynamic
+Let's create an `/actions` folder in our `/javascript` directory and in that foler create an `index.js` file.
+
+In our `actions/index.js` we can create our first action. We're going to need our `getComments` function from our `CommentClient` so let's imort that. 
+
+``` JavaScript
+import { getComments } from '../client/CommentClient'
+```
+Next let's cerate const called FETCH_COMMENTS. We'll use this to look for our action type.
+``` JavaScript
+export const FETCH_COMMENTS = "FETCH_COMMENTS"
+```
+And finally our the `fetchComments` action that we can dispatch from our component. This action will return an object that has two keys, a type and a payload. 
+
+The type will be FETCH_COMMENTS and this is how Redux will know which action to dispatch. We will tell it the type and it will look for a match as it flows through the reducers.
+
+The payload will be the results of our `getComments` function call from the `CommentClient`.
+
+``` JavaScript
+export function fetchComments() {
+  return {
+    type: FETCH_COMMENTS,
+    payload: getComments()
+  }
+}
+```
+We do need to make a slight update to the `getComments` function. We're currenlty updating the state with our response but Redux is handling our state now.
+
+We've already added the `redux-promise` so our reducers can handle async requests. All we need to do is pass in a promise in as our payload and `redux-promise` will handle the rest.
+
+``` JavaScript
+export function getComments() {
+  fetch('/comments.json')
+  .then((response) => {
+    return response.json();
+  }) 
+};
+```
+### Release 4: Dispatching an action
+Let's dispatch that action from our `CommentsContainer` component.
+
+### Release 5: Making The commentReducer Dynamic
+We're loading our comments from Redux and that's awesome but not super useful when the reducer is just returning a static value. Let's get set up to get the comments from the database.
+
+Luckily we already have a client set up so just a few changes will get us rolling!
+
 

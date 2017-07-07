@@ -1,16 +1,17 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom'
 import CommentsContainer from './CommentsContainer'
-import { createStore } from 'redux'
+import { createStore, applyMiddleware } from 'redux'
 import { Provider } from 'react-redux';
 import commentReducer from '../reducers/commentReducer'
+import ReduxPromise from 'redux-promise'
 
-const store = createStore(commentReducer)
+const createStoreWithMiddleware = applyMiddleware(ReduxPromise)(createStore)
 
 class CommentIndex extends Component {
   render() {
     return (
-      <Provider store={store}>
+      <Provider store={createStoreWithMiddleware(commentReducer)}>
         <CommentsContainer />  
       </Provider>
     )

@@ -106,47 +106,75 @@ and this is happening every time Redux looks through our reducers. But we need t
 
 Let's create an `/actions` folder in our `/javascript` directory and in that foler create an `index.js` file.
 
-In our `actions/index.js` we can create our first action. We're going to need our `getComments` function from our `CommentClient` so let's imort that. 
+In our `actions/index.js` we can create our first action. 
 
-``` JavaScript
-import { getComments } from '../client/CommentClient'
-```
-Next let's cerate const called FETCH_COMMENTS. We'll use this to look for our action type.
+Let's start by cerating a const called FETCH_COMMENTS. This will be our action's type. We're setting it to a const here so it's only defined in one place and we can import it where we need to use it.
 ``` JavaScript
 export const FETCH_COMMENTS = "FETCH_COMMENTS"
 ```
-And finally our the `fetchComments` action that we can dispatch from our component. This action will return an object that has two keys, a type and a payload. 
+Now we can create our action. This will be a function named `fetchComments` and it will return an object that has two keys, a type and a payload. 
 
-The type will be FETCH_COMMENTS and this is how Redux will know which action to dispatch. We will tell it the type and it will look for a match as it flows through the reducers.
+The value for type will be FETCH_COMMENTS and this is how Redux will know which action to dispatch. We will tell it the type and it will look for a match as it flows through the reducers.
 
-The payload will be the results of our `getComments` function call from the `CommentClient`.
+The payload will be the static comment that previously lived in our reducer. When we're done our index.js file will look like this.
 
 ``` JavaScript
+export const FETCH_COMMENTS = "FETCH_COMMENTS"
+
 export function fetchComments() {
   return {
     type: FETCH_COMMENTS,
-    payload: getComments()
+    payload: [{id: 1, author: "me!", body: "from the reducer"}]
   }
 }
 ```
-We do need to make a slight update to the `getComments` function. We're currenlty updating the state with our response but Redux is handling our state now.
+Our action is set up which is awesome, but our reducer still always returns it's piece of state every time. Let's tie these together.
 
-We've already added the `redux-promise` so our reducers can handle async requests. All we need to do is pass in a promise in as our payload and `redux-promise` will handle the rest.
-
+We'll start by importing FETCH_COMMENTS from our `/actions/index.js` file.
 ``` JavaScript
-export function getComments() {
-  fetch('/comments.json')
-  .then((response) => {
-    return response.json();
-  }) 
-};
+import { FETCH_COMMENTS } from '../actions/index'
 ```
+Our reducer has a second argument of action and that's what we're going to use. We'll add a switch statement that checks the action type and returns it's payload when there's a match. In this case it will be the static comment we created.
+``` JavaScript
+export default ( state = [], action) => {
+  switch(action.type){
+    case FETCH_COMMENTS:
+    return action.payload
+  }
+  return state
+}
+```
+Ok our reducer is all set up to only return state when a particular action is dispatched, but now our page doesn't work. That's because we've only created the action and aren't dispatching it anywhere! Let's get to release 4 to see how we can do that.
 ### Release 4: Dispatching an action
-Let's dispatch that action from our `CommentsContainer` component.
+To utilize the action, we'll need to dispatch it from our `CommentsContainer` component to let Redux know when we want that piece of state updated. 
+We can start by importing our action from the `/actions/index.js` file.
+``` JavaScript
+import { fetchComments } from '../actions/index';
+```
+We're also going to need to import a function from redux.
+``` JavaScript
+import { bindActionCreators } from 'redux';
+```
+And create another function at the bottom of our component called mapDispatchToProps. This is also expected by react-redux. It will take dispatch as an argument and will return the `bindActionCreators` function with an object of the actions we want to dispatch and dispatch as the second argument.
+// How do I explain what dispatch is here?
+``` JavaScript
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators({fetchComments}, dispatch)
+}
+```
+And update our export by passing `mapDispatchToProps` as a second argument to `connect`
+``` JavaScript
+export default connect(mapStateToProps, mapDispatchToProps)(CommentsContainer);
+```
+Now the `fetchComments` action is available on the components prop and in this case we can just dispatch it when the component mounts.
+``` JavaScript
+componentDidMount() {
+  this.props.fetchComments()
+}
+```
+There we go! When our component mounts, the fetchComments action is dispatched. It's type FETCH_COMMENTS matches our case statement in our reducer and the payload is returned.
 
-### Release 5: Making The commentReducer Dynamic
-We're loading our comments from Redux and that's awesome but not super useful when the reducer is just returning a static value. Let's get set up to get the comments from the database.
-
-Luckily we already have a client set up so just a few changes will get us rolling!
+However that payload is still our static comment, so let's make it dynamic!
+### Release 5: Calling The Database From An Action
 
 

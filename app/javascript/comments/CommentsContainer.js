@@ -4,6 +4,8 @@ import Form from './Form'
 import { getComments, createComment, deleteComment } from '../client/CommentClient'
 import { getFormValues, commentList } from '../Utils/utils'
 import { connect } from 'react-redux';
+import { fetchComments } from '../actions/index';
+import { bindActionCreators } from 'redux';
 
 class CommentsContainer extends Component {
   constructor(props) {
@@ -16,7 +18,7 @@ class CommentsContainer extends Component {
   }
 
   componentDidMount() {
-    getComments.bind(this)();
+    this.props.fetchComments()
   }
 
   handleFormSubmit(event) {
@@ -60,5 +62,9 @@ function mapStateToProps(state) {
   }
 }
 
-export default connect(mapStateToProps, null)(CommentsContainer);
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators({fetchComments}, dispatch)
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(CommentsContainer);
 

@@ -3,6 +3,11 @@ export function getComments() {
   .then((response) => {
     return response.json();
   }) 
+  .then((responseObject) => {
+    this.setState({
+      comments: responseObject
+    }) 
+  });
 };
 
 export function createComment(newComment) {

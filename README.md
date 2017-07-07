@@ -176,5 +176,29 @@ There we go! When our component mounts, the fetchComments action is dispatched. 
 
 However that payload is still our static comment, so let's make it dynamic!
 ### Release 5: Calling The Database From An Action
+Because of the way we have set everything up we only need to make a couple of changes in our action and client to get information from the database.
+
+First let's update our action. Currently our payload is static data so this is where we have to make the change. Let's import our `getComments` function from the client and set that as the value for our payload.
+
+``` JavaScript 
+import { getComments } from '../client/CommentClient'
+
+export function fetchComments() {
+  return {
+    type: FETCH_COMMENTS,
+    payload: getComments()
+  }
+}
+```
+Cool! One more issue, we've added the redux-promise middleware to help with async calls in our actions. As the name suggests, it's expecting to receive a promise. We just need to update our client and remove the second `.then` call where we're setting state. The `return response.json()` line will parse our readStream into a promise that redux-promise can use
+``` JavaScript
+export function getComments() {
+  return fetch('/comments.json')
+  .then((response) => {
+    return response.json();
+  }) 
+};
+```
+And we're fetching dynamic information with redux! Let's set it up so that we can create a comment as well.
 
 

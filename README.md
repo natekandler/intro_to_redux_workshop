@@ -97,9 +97,60 @@ export default connect(mapStateToProps)(CommentsContainer);
 Voila! If we inspect the props on our `CommentsContainer` we can see the value passed in from our reducer as the `comments` prop.
 
 And if we just change the prop passed in to our `Comments` component to use the comments from props rather that the component state we're displaying comments using Redux!
-```
+``` JavaScript
 <Comments comments={this.props.comments} deleteComment={deleteComment.bind(this)} />
 ```
+### Release 3: Creating Our First Action
+Right now we have a reducer that is returning a particular piece of state 
+and this is happening every time Redux looks through our reducers. But we need to tell Redux to update that state only when we want. We'll do this by creating an action.
 
-### Release 3: Making the commentReducer dynamic
+Let's create an `/actions` folder in our `/javascript` directory and in that foler create an `index.js` file.
+
+In our `actions/index.js` we can create our first action. 
+
+Let's start by cerating a const called FETCH_COMMENTS. This will be our action's type. We're setting it to a const here so it's only defined in one place and we can import it where we need to use it.
+``` JavaScript
+export const FETCH_COMMENTS = "FETCH_COMMENTS"
+```
+Now we can create our action. This will be a function named `fetchComments` and it will return an object that has two keys, a type and a payload. 
+
+The value for type will be FETCH_COMMENTS and this is how Redux will know which action to dispatch. We will tell it the type and it will look for a match as it flows through the reducers.
+
+The payload will be the static comment that previously lived in our reducer. When we're done our index.js file will look like this.
+
+``` JavaScript
+export const FETCH_COMMENTS = "FETCH_COMMENTS"
+
+export function fetchComments() {
+  return {
+    type: FETCH_COMMENTS,
+    payload: [{id: 1, author: "me!", body: "from the reducer"}]
+  }
+}
+```
+Our action is set up which is awesome, but our reducer still always returns it's piece of state every time. Let's tie these together.
+
+We'll start by importing FETCH_COMMENTS from our `/actions/index.js` file.
+``` JavaScript
+import { FETCH_COMMENTS } from '../actions/index'
+```
+Our reducer has a second argument of action and that's what we're going to use. We'll add a switch statement that checks the action type and returns it's payload when there's a match. In this case it will be the static comment we created.
+``` JavaScript
+export default ( state = [], action) => {
+  switch(action.type){
+    case FETCH_COMMENTS:
+    return action.payload
+  }
+  return state
+}
+```
+Ok our reducer is all set up to only return state when a particular action is dispatched, but now our page doesn't work. That's because we've only created the action and aren't dispatching it anywhere! Let's get to release 4 to see how we can do that.
+### Release 4: Dispatching an action
+Let's dispatch that action from our `CommentsContainer` component.
+
+### Release 5: Making The commentReducer Dynamic
+We're loading our comments from Redux and that's awesome but not super useful when the reducer is just returning a static value. Let's get set up to get the comments from the database.
+
+Luckily we already have a client set up so just a few changes will get us rolling!
+
 

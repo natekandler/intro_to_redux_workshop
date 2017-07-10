@@ -21,14 +21,6 @@ class CommentsContainer extends Component {
     this.props.fetchComments()
   }
 
-  handleFormSubmit(event) {
-    event.preventDefault();
-    let newComment = getFormValues(event.target)
-    if(newComment.body){
-      createComment.bind(this)(newComment)
-    }
-  }
-
   hideCommentForm(e) {
     e.preventDefault();
     this.setState({ showForm: false })
@@ -40,7 +32,7 @@ class CommentsContainer extends Component {
   
   renderForm() {
     if(this.state.showForm){
-      return <Form handleFormSubmit={this.handleFormSubmit.bind(this)} hideCommentForm={this.hideCommentForm.bind(this)} />
+      return <Form hideCommentForm={this.hideCommentForm.bind(this)} />
     } else {
       return <button onClick={this.showCommentForm.bind(this)}>Add Comment</button>
     }

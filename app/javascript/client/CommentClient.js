@@ -8,7 +8,7 @@ export function getComments() {
 export function createComment(newComment) {
   let token = document.head.querySelector("[name=csrf-token]").content;
   let body = JSON.stringify({comment: newComment});
-  fetch('/comments', {
+  return fetch('/comments', {
     method: 'post',
     body: body,
     headers: {
@@ -19,13 +19,7 @@ export function createComment(newComment) {
     credentials: 'same-origin'
   })
   .then((response) => {
-    response.json().then((data) => {
-      let list = [...this.state.comments, data]
-      this.setState({ 
-        showForm: false,
-        comments: list
-      })
-    })
+    return response.json()
   })
 }
 

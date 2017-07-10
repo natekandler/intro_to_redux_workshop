@@ -200,5 +200,171 @@ export function getComments() {
 };
 ```
 And we're fetching dynamic information with redux! Let's set it up so that we can create a comment as well.
+### Release 6: Creating A Comment
+Currently to create a comment we need to define the function in the top level component and pass it in to our form. If we are using redux's application state, we can create an action and then dispatch it from the form itself. 
+
+In our `/actions/index.js` folder let's create an action called `createNewComment`. This is going to use the `createComment` function from our `CommentClient` so let's go ahead and import that.
+``` JavaScript
+import { getComments, createComment } from '../client/CommentClient'
+```
+And let's create another const we can export for the create action
+``` JavaScript
+export const CREATE_COMMENT = "CREATE_COMMENT"
+```
+For the action itself, this time it is going to take an argument. This will be the data we've entered in the new comment form that the `createComment` function in our client expects.
+
+Just like the in the `fetchComments` action, the type will be the const we created. The payload will be the response from our 'createComment` function.
+``` JavaScript
+export function createNewComment(commentData) {
+  return {
+    type: CREATE_COMMENT,
+    payload: createComment(commentData)
+  }
+}
+```
+Because redux-promise is expecting a promise in the payload we will need to update the `createComment` function in our client just like we had to update `getComments`.
+``` JavaScript
+export function createComment(newComment) {
+  let token = document.head.querySelector("[name=csrf-token]").content;
+  let body = JSON.stringify({comment: newComment});
+  return fetch('/comments', {
+    method: 'post',
+    body: body,
+    headers: {
+      'X-CSRF-Token': token,
+      'accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    credentials: 'same-origin'
+  })
+  .then((response) => {
+    return response.json()
+  })
+}
+```
+We need to add a case for the `CREATE_COMMENT` type to our `commentReducer`. We need to return the current array of comments with our new comment added. We don't want to mutate the state directly so we can use the es6 spread operator to create a new array with the old array's contents.
+``` JavaScript
+export default ( state = [], action) => {
+  switch(action.type){
+    case FETCH_COMMENTS:
+      return action.payload
+    case CREATE_COMMENT:
+      return [...state, action.payload];
+  }
+  return state
+}
+```
+Don't forget to import the `CREATE_COMMENT` const.
+``` JavaScript
+import { FETCH_COMMENTS, CREATE_COMMENT } from '../actions/index'
+```
+Let's update our components to use everything we've created!
+
+First we can remove the `handleFormSubmit` function from our `CommentsContainer`. This is going to be handle by the form itself. 
+
+Now we'll only be passing `hideCommentForm` as a prop to our `Form` component. 
+``` JavaScript
+return <Form hideCommentForm={this.hideCommentForm.bind(this)} />
+```
+In our form component, we'll need to import the getFormValues function from utils as well as the `newComment` action we created, the `connect` function from react-redux, and `bindActionCreators` from redux.
+``` JavaScript
+import { getFormValues } from '../Utils/utils'
+import { createNewComment } from '../actions/index';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+```
+We need to define a new `handleFormSubmit` function in our `Form` component. It will process the form data into key/value pairs and dispatch our `newComment` action as well as calling the `hideCommentForm` function we passed in from our `CommentsContainer`.
+``` JavaScript
+handleFormSubmit(event) {
+  event.preventDefault();
+  let newComment = getFormValues(event.target)
+  newComment.author = newComment.author ? newComment.author : "anonymous"
+  if(newComment.body){
+    this.props.createNewComment(newComment)
+    this.props.hideCommentForm(event)
+  }
+}
+```
+Let's not forget to add that to the submit event of our form element.
+``` JavaScript
+<form className="Form" onSubmit={this.handleFormSubmit.bind(this)}>
+```
+And we'll need a `mapDispatchToProps` function as well as an updated export.
+``` JavaScript
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators({createNewComment}, dispatch)
+}
+
+export default connect(null, mapDispatchToProps)(Form);
+```
+Notice in our export we're passing `null` in as the first argument. This is because `connect` expects `mapStateToProps` as a first argument and if we're not providing that we need to pass null so `mapDispatchToProps` is still our second argument.
+
+And we're creating new comments! But we're also going to want to have the ability to delete them. Let's move to release 7 and add that ability.
+### Release 7: Deleting Comments
+Our `Comment` component is functional and we want to keep it that way. Let's redefine the delete comment function in our `CommentsContainer` to update the redux application state.
+
+From our previous work we know what we need to do, create an action, add a reducer that handles that action's type, and dispatch that action from a component.
+
+First let's add our action. As before we're going to import the database call from our client and define a const for the action type.
+
+``` JavaScript
+import { getComments, createComment, deleteCommen from '../client/CommentClient'
+
+export const DELETE_COMMENT = "DELETE_COMMENT"
+```
+Then we'll define the action itself.
+``` JavaScript
+export function removeComment(id) {
+  return {
+    type: DELETE_COMMENT,
+    payload: deleteComment(id)
+  }
+}
+```
+Now let's import our type and add a a case in our `commentReducer`
+``` JavaScript
+import { FETCH_COMMENTS, CREATE_COMMENT, DELETE_COMMENT } from '../actions/index'
+
+case DELETE_COMMENT:
+  return state.filter(function(comment){
+    return comment.id != action.payload.id
+  })
+```
+Here we're filtering and returning all of the comments that don't match the id of the comment we just deleted.
 
 
+Let's update the 'deleteComment' function in our client to just return a promise. We can remove that function that handles updating the state, it will be taken care of by redux.
+``` JavaScript
+export function deleteComment(id) {
+  let token = document.head.querySelector("[name=csrf-token]").content;
+
+  return (
+    fetch(`comments/${id}.json`, {
+      method: 'delete',
+      body: JSON.stringify({"id": id}),
+      headers: {
+        'X-CSRF-Token': token,
+        'Content-Type': 'application/json'
+      },
+      credentials: 'same-origin'
+    }).then((response) => {
+      return response.json()
+    })
+  )
+}
+```
+Now we can import our `removeComment` action in our `CommentContainer`
+``` JavaScript
+import { fetchComments, removeComment } from '../actions/index';
+```
+Add it to our `mapDispatchToProps`
+``` JavaScript
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators({fetchComments, removeComment}, dispatch)
+}
+```
+And finally update the function we're passing through to be our redux function.
+``` JavaScript
+<Comments comments={this.props.comments} deleteComment={this.props.removeComment.bind(this)} />
+```
+And that's it! We have a functioning comment section with redux helping tomanage our state. 

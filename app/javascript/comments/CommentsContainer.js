@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import Comments from './Comments'
 import Form from './Form'
-import { getComments, createComment, deleteComment } from '../client/CommentClient'
-import { getFormValues, commentList } from '../Utils/utils'
 import { connect } from 'react-redux';
-import { fetchComments } from '../actions/index';
+import { fetchComments, removeComment } from '../actions/index';
 import { bindActionCreators } from 'redux';
 
 class CommentsContainer extends Component {
@@ -21,14 +19,6 @@ class CommentsContainer extends Component {
     this.props.fetchComments()
   }
 
-  handleFormSubmit(event) {
-    event.preventDefault();
-    let newComment = getFormValues(event.target)
-    if(newComment.body){
-      createComment.bind(this)(newComment)
-    }
-  }
-
   hideCommentForm(e) {
     e.preventDefault();
     this.setState({ showForm: false })
@@ -37,10 +27,10 @@ class CommentsContainer extends Component {
   showCommentForm() {
     this.setState({ showForm: true })
   } 
-  
+
   renderForm() {
     if(this.state.showForm){
-      return <Form handleFormSubmit={this.handleFormSubmit.bind(this)} hideCommentForm={this.hideCommentForm.bind(this)} />
+      return <Form hideCommentForm={this.hideCommentForm.bind(this)} />
     } else {
       return <button onClick={this.showCommentForm.bind(this)}>Add Comment</button>
     }
@@ -49,7 +39,7 @@ class CommentsContainer extends Component {
   render() {
     return (
       <div className="CommentsContainer">
-        <Comments comments={this.props.comments} deleteComment={deleteComment.bind(this)} />
+        <Comments comments={this.props.comments} deleteComment={this.props.removeComment.bind(this)} />
         {this.renderForm()}
       </div>
     )
@@ -63,7 +53,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators({fetchComments}, dispatch)
+  return bindActionCreators({fetchComments, removeComment}, dispatch)
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(CommentsContainer);

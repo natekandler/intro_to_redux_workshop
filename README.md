@@ -18,9 +18,9 @@ An important note, the application state provided by Redux is totally separate f
 
 ### Release 0
 We'll need to start by adding a couple of libraries. From our root directory let's run the following commands.
-* `yarn add redux --save`
-* `yarn add react-redux --save`
-* `yarn add redux-promise --save`
+* `yarn add redux`
+* `yarn add react-redux`
+* `yarn add redux-promise`
 The first item is self explanatory, this adds the Redux library to our project. The second, React-Redux provides bindings for React that we will be able to use in our components. The third Redux-Promise is middleware that we will use when making our database calls. We'll get into that a little more later.
 
 These libraries are now listed as dependencies in our package.json and yarn.lock files.
